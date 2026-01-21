@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>長者方案個別化調整模擬器</title>
+    <!-- 載入 React, Babel 與 Tailwind CSS -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Lucide 圖標 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // 模擬 Lucide 圖標組件
+        const Icon = ({ name, className, size = 24 }) => {
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [name]);
+            return <i data-lucide={name} className={className} style={{ width: size, height: size }}></i>;
+        };
+
+        const App = () => {
+            const [selectedProfile, setSelectedProfile] = useState(null);
+            const [checklist, setChecklist] = useState({ item1: false, item2: false, item3: false });
+            const [showResult, setShowResult] = useState(false);
+
+            const checklistItems = [
+                { id: 'item1', label: '課程內容或活動方式，得依服務對象之健康狀況、能力差異與在地文化特色彈性調整。' },
+                { id: 'item2', label: '於長者肢體/認知功能相關活動中，提供能力分級之示範（如坐姿與站姿版本）。' },
+                { id: 'item3', label: '可提供方案內容依據點及參與人員意見進行調整的佐證資料。' }
+            ];
+
+            const profiles = [
+                {
+                    id: 'physical_weak',
+                    icon: 'accessibility',
+                    title: '肢體功能受限',
+                    description: '長者下肢力氣不足或平衡較差',
+                    standard: '進行 15 分鐘的站立式毛巾操。',
+                    adjustment: {
+                        method: '提供坐姿版本',
+                        guidance: '「王大哥，如果您覺得站著會累，我們坐在椅子前緣 1/3，腰桿挺直，一樣可以跟著節奏做喔！」',
+                        tip: '確保椅子穩固，提醒長者雙腳踩實地面。'
+                    }
+                },
+                {
+                    id: 'cognitive_slow',
+                    icon: 'brain',
+                    title: '認知/理解較慢',
+                    description: '對於複雜指令反應較慢，或容易混淆步驟',
+                    standard: '請長者照著順序完成「拍手-摸肩-舉手」的循環。',
+                    adjustment: {
+                        method: '簡化指令與操作提示',
+                        guidance: '「我們先做第一個動作：拍手。好，現在換第二個：摸肩膀。」(一次只給一個指令，並配合清楚的視覺提示)',
+                        tip: '使用顏色標籤或口訣（如：1拍、2摸、3舉）。'
+                    }
+                },
+                {
+                    id: 'cultural_specific',
+                    icon: 'map-pin',
+                    title: '在地特色社區',
+                    description: '具有特殊族群（如原民、農村）或在地語言需求',
+                    standard: '使用標準國語引導，並以現代城市健身房為例。',
+                    adjustment: {
+                        method: '在地生活情境融入',
+                        guidance: '「大家想像我們現在正在採茶（或拔花生），這個舉手的動作就像在夠上面的樹枝...」',
+                        tip: '加入在地慣用語或歌謠作為背景音樂，增加親切感。'
+                    }
+                }
+            ];
+
+            const handleCheck = (id) => {
+                setChecklist(prev => ({ ...prev, [id]: !prev[id] }));
+            };
+
+            const getResultFeedback = () => {
+                const checkedCount = Object.values(checklist).filter(Boolean).length;
+                const unCheckedItems = checklistItems.filter(item => !checklist[item.id]);
+
+                if (checkedCount === 3) {
+                    return {
+                        title: "完美達成！",
+                        message: "太棒了！您已經全面落實了方案的個別化調整，這將大幅提升長者的參與感與成效。",
+                        color: "bg-green-600",
+                        icon: "trophy"
+                    };
+                } else {
+                    return {
+                        title: "初步優化達成！",
+                        message: "肯定您目前的規劃與努力！目前已初步具備個別化思維。若未來能進一步執行以下項目，相信方案內容設計的專業度與涵容力將會再提升：",
+                        pending: unCheckedItems,
+                        color: "bg-indigo-600",
+                        icon: "sparkles"
+                    };
+                }
+            };
+
+            const result = getResultFeedback();
+
+            return (
+                <div className="min-h-screen p-4 md:p-8">
+                    <div className="max-w-4xl mx-auto">
+                        <header className="bg-white rounded-2xl p-6 shadow-sm mb-8 border-l-8 border-indigo-600">
+                            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 flex items-center gap-3">
+                                <Icon name="edit-3" className="text-indigo-600" />
+                                長者方案個別化調整模擬器
+                            </h1>
+                            <p className="mt-2 text-slate-600">附件一 (三) 方案課程調整與個別化：協助研發單位與師資掌握彈性調整的技巧。</p>
+                        </header>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div className="md:col-span-1 space-y-4">
+                                <h2 className="text-lg font-semibold text-slate-700 flex items-center gap-2">
+                                    <span className="bg-indigo-100 text-indigo-700 w-7 h-7 rounded-full flex items-center justify-center text-sm">1</span>
+                                    選擇長者特質
+                                </h2>
+                                {profiles.map((profile) => (
+                                    <button
+                                        key={profile.id}
+                                        onClick={() => { setSelectedProfile(profile); setShowResult(false); }}
+                                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${selectedProfile?.id === profile.id ? 'border-indigo-600 bg-indigo-50 shadow-md' : 'border-white bg-white hover:border-indigo-200 shadow-sm'}`}
+                                    >
+                                        <div className={`p-2 rounded-lg inline-block mb-2 ${selectedProfile?.id === profile.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                            <Icon name={profile.icon} />
+                                        </div>
+                                        <h3 className="font-bold text-slate-800">{profile.title}</h3>
+                                        <p className="text-xs text-slate-500 mt-1">{profile.description}</p>
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <h2 className="text-lg font-semibold text-slate-700 flex items-center gap-2 mb-4">
+                                    <span className="bg-indigo-100 text-indigo-700 w-7 h-7 rounded-full flex items-center justify-center text-sm">2</span>
+                                    模擬調整建議
+                                </h2>
+                                {selectedProfile ? (
+                                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                        <div className="p-6 bg-slate-800 text-white">
+                                            <p className="text-sm text-slate-400 italic mb-1">原本的標準課程內容</p>
+                                            <p className="text-lg opacity-90">{selectedProfile.standard}</p>
+                                        </div>
+                                        <div className="p-6 space-y-6">
+                                            <div>
+                                                <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold mb-2">調整方式</span>
+                                                <h4 className="text-xl font-bold text-slate-800">{selectedProfile.adjustment.method}</h4>
+                                            </div>
+                                            <div className="bg-indigo-50 p-4 rounded-xl border-l-4 border-indigo-400">
+                                                <h5 className="text-sm font-bold text-indigo-700 mb-2 italic">推薦引導語建議：</h5>
+                                                <p className="text-slate-700 italic">{selectedProfile.adjustment.guidance}</p>
+                                            </div>
+                                            <div className="flex items-start gap-3 text-sm text-slate-600 bg-amber-50 p-3 rounded-lg border border-amber-100">
+                                                <Icon name="check-circle-2" className="text-amber-500 mt-0.5" size={18} />
+                                                <div><span className="font-bold text-amber-800 block mb-1">執行小撇步 (Tips):</span>{selectedProfile.adjustment.tip}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="h-64 border-4 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-slate-400">
+                                        <Icon name="edit-3" size={48} className="mb-2 opacity-20" />
+                                        <p>請從左側選擇一個長者特質情境</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                            <h2 className="text-lg font-semibold text-slate-700 flex items-center gap-2 mb-4">
+                                <span className="bg-indigo-100 text-indigo-700 w-7 h-7 rounded-full flex items-center justify-center text-sm">3</span>
+                                附件一：自我檢核項目 (面向三)
+                            </h2>
+                            <div className="space-y-3">
+                                {checklistItems.map((item, idx) => (
+                                    <label key={item.id} className={`flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors group ${idx !== 0 ? 'border-t border-slate-100' : ''}`}>
+                                        <input type="checkbox" checked={checklist[item.id]} onChange={() => { handleCheck(item.id); setShowResult(false); }} className="mt-1 w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+                                        <span className={`text-sm ${checklist[item.id] ? 'text-indigo-600 font-medium' : 'text-slate-700'}`}>{item.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                            {showResult && (
+                                <div className={`mt-6 p-6 rounded-xl text-white ${result.color} shadow-xl animate-bounce-short`}>
+                                    <div className="flex items-start gap-4">
+                                        <Icon name={result.icon} size={32} />
+                                        <div className="flex-1">
+                                            <h3 className="text-xl font-bold mb-2">{result.title}</h3>
+                                            <p className="text-sm mb-4 opacity-90">{result.message}</p>
+                                            {result.pending && result.pending.length > 0 && (
+                                                <div className="bg-white/10 rounded-lg p-4 space-y-2 border border-white/20">
+                                                    <p className="text-xs font-bold text-white/70 italic uppercase">未來可進階精進之項目：</p>
+                                                    {result.pending.map(item => (
+                                                        <div key={item.id} className="flex items-start gap-2 text-sm">
+                                                            <div className="w-1.5 h-1.5 bg-white/40 rounded-full mt-1.5 shrink-0"></div>
+                                                            <span>{item.label}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-8 text-center">
+                            <button 
+                                className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 mx-auto"
+                                onClick={() => {
+                                    if(Object.values(checklist).some(Boolean)) {
+                                        setShowResult(true);
+                                    } else {
+                                        alert('請至少勾選一個您已實踐的優化項目喔！');
+                                    }
+                                }}
+                            >
+                                <Icon name="sparkles" size={20} /> 查看優化成果回饋
+                            </button>
+                        </div>
+                        <footer className="mt-12 mb-8 text-center text-slate-400 text-xs">115年預防及延緩失能照護服務輔導暨方案管理計畫</footer>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
